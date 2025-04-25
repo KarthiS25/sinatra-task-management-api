@@ -14,6 +14,16 @@ class TaskMangementsController < Sinatra::Base
     content_type :json
   end
 
+  def create_params
+    request_payload = JSON.parse(request.body.read)
+    create_params = request_payload.slice("title", "description", "date", "start_time", "end_time")
+  end
+
+  def update_params
+    request_payload = JSON.parse(request.body.read)
+    create_params = request_payload.slice("id", "title", "description", "date", "start_time", "end_time")
+  end
+
   get '/tasks' do
     if current_user.admin?
       @task_managements = TaskManagement.all
@@ -26,20 +36,26 @@ class TaskMangementsController < Sinatra::Base
   end
 
   post '/tasks' do
-    request_payload = JSON.parse(response.body.read)
-    title = request_payload[:title]
-    description = request_payload[:description]
-    date = request_payload[:date]
-    start_time = request_payload[:start_time]
-    end_time = request_payload[:end_time]
-    @task_management = current_user.task_managements.create(title: title,
-                                                            description: description,
-                                                            date: date,
-                                                            start_time: start_time,
-                                                            end_time: end_time
-                                                            )
+    @task_management = current_user.task_managements.new(create_params)
+    if @task_management.save
+      response = ActiveModelSerializers::SerializableResource.new(@task_management, serializer: TaskMangementSerializer).as_json
+      response.to_json
+    else
+      status 422
+      json(message: @task_management.errors.full_messages[0])
+    end
+  end
 
-    response = ActiveModelSerializers::SerializableResource.new(@task_management, serializer: TaskMangementSerializer).as_json
-    response.to_json
+  put '/tasks/:id' do
+    @task_management = current_user.task_managements.find_by(id: params[:id])
+
+    if @task_management.present?
+      @task_management.update(update_params)
+      status 200
+      json(message: "Task updated successfully")
+    else
+      status 404
+      json(message: "Task not found")
+    end
   end
 end

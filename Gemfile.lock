@@ -57,6 +57,7 @@ GEM
     erubi (1.13.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
+    json (2.11.2)
     jsonapi-renderer (0.2.2)
     jwt (2.10.1)
       base64
@@ -113,8 +114,17 @@ GEM
       loofah (~> 2.21)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     rake (13.2.1)
+    redis (4.0.3)
+    redis-client (0.24.0)
+      connection_pool
     ruby2_keywords (0.0.5)
     securerandom (0.4.1)
+    sidekiq (8.0.3)
+      connection_pool (>= 2.5.0)
+      json (>= 2.9.0)
+      logger (>= 1.6.2)
+      rack (>= 3.1.0)
+      redis-client (>= 0.23.2)
     sinatra (4.1.1)
       logger (>= 1.6.0)
       mustermann (~> 3.0)
@@ -160,6 +170,8 @@ DEPENDENCIES
   puma (~> 6.6)
   rackup (~> 2.2)
   rake
+  redis
+  sidekiq
   sinatra
   sinatra-activerecord
   sinatra-contrib

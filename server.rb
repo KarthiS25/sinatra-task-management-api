@@ -5,6 +5,8 @@ require 'active_model_serializers'
 require 'sinatra/contrib'
 require 'securerandom'
 require 'dotenv/load'
+require 'redis'
+require_relative 'config/sidekiq'
 
 set :port, 3000
 
