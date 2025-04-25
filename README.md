@@ -13,12 +13,12 @@
 
 * Run the following commands for database creation
 
-    - `rails db:create`
-    - `rails db:migrate`
+    - `bundle exec rake db:create`
+    - `bundle exec rake db:migrate`
 
 * Run the following commands to create all seed data.
 
-    - `rails db:seed`
+    - `bundle exec rake db:seed`
 
 * Run the server
 
