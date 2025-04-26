@@ -2,7 +2,6 @@ require 'sinatra/base'
 require 'sinatra/contrib'
 require 'active_model_serializers'
 require_relative '../serializers/task_management_serializer'
-require 'pry'
 
 class TaskMangementsController < Sinatra::Base
   helpers UserHelper
@@ -21,7 +20,16 @@ class TaskMangementsController < Sinatra::Base
 
   def update_params
     request_payload = JSON.parse(request.body.read)
-    create_params = request_payload.slice("id", "title", "description", "date", "start_time", "end_time")
+    update_params = request_payload.slice("id", "title", "description", "date", "start_time", "end_time")
+  end
+
+  def get_task_management(id)
+    @task_management = current_user.task_managements.find_by(id: id)
+    halt 404, json(message: "Task not found") unless @task_management
+  end
+
+  def error_message
+    halt 422, json(message: @task_management.errors.full_messages[0])
   end
 
   get '/tasks' do
@@ -41,21 +49,20 @@ class TaskMangementsController < Sinatra::Base
       response = ActiveModelSerializers::SerializableResource.new(@task_management, serializer: TaskMangementSerializer).as_json
       response.to_json
     else
-      status 422
-      json(message: @task_management.errors.full_messages[0])
+      error_message
     end
   end
 
   put '/tasks/:id' do
-    @task_management = current_user.task_managements.find_by(id: params[:id])
+    get_task_management(params[:id])
+    error_message unless @task_management.update(update_params)
 
-    if @task_management.present?
-      @task_management.update(update_params)
-      status 200
-      json(message: "Task updated successfully")
-    else
-      status 404
-      json(message: "Task not found")
-    end
+    halt 200, json(message: "Task updated successfully")
+  end
+
+  delete '/tasks/:id' do
+    get_task_management(params[:id])
+    error_message unless @task_management.destroy
+    halt 200, json(message: "Task deleted successfully")
   end
 end

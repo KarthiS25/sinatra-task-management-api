@@ -1,13 +1,14 @@
 require_relative '../jobs/task_management_job'
+require 'sidekiq/api'
 
 class TaskManagement < ActiveRecord::Base
   belongs_to :user
 
   after_commit :trigger_mail_job
-  validates :title, presence: true, uniqueness: { scope: :user_id, message: "has already been taken for this user" }
+  validates :title, presence: true, uniqueness: { scope: :user_id, message: "has already been taken for this user" }, on: :create
 
   def trigger_mail_job
-    if saved_changes_to_start_time?
+    if saved_change_to_start_time?
       remove_existing_job if self.job_id.present?
 
       jid = TaskManagementJob.perform_at(self.start_time - 1.hours, self.id)

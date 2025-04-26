@@ -1,3 +1,5 @@
+require_relative '../config/sidekiq'
+
 class TaskManagementJob
   include Sidekiq::Worker
 
