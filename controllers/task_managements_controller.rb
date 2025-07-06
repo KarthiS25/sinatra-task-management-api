@@ -7,6 +7,7 @@ class TaskMangementsController < Sinatra::Base
   helpers UserHelper
   register Sinatra::ActiveRecordExtension
   helpers Sinatra::JSON
+  register Sinatra::Namespace
 
   before do
     protected!
@@ -32,37 +33,39 @@ class TaskMangementsController < Sinatra::Base
     halt 422, json(message: @task_management.errors.full_messages[0])
   end
 
-  get '/tasks' do
-    if current_user.admin?
-      @task_managements = TaskManagement.all
-    else
-      @task_managements = current_user.task_managements
-    end
+  namespace '/api/v1' do
+    get '/tasks' do
+      if current_user.admin?
+        @task_managements = TaskManagement.all
+      else
+        @task_managements = current_user.task_managements
+      end
 
-    response = ActiveModelSerializers::SerializableResource.new(@task_managements, each_serializer: TaskMangementSerializer).as_json
-    response.to_json
-  end
-
-  post '/tasks' do
-    @task_management = current_user.task_managements.new(create_params)
-    if @task_management.save
-      response = ActiveModelSerializers::SerializableResource.new(@task_management, serializer: TaskMangementSerializer).as_json
+      response = ActiveModelSerializers::SerializableResource.new(@task_managements, each_serializer: TaskMangementSerializer).as_json
       response.to_json
-    else
-      error_message
     end
-  end
 
-  put '/tasks/:id' do
-    get_task_management(params[:id])
-    error_message unless @task_management.update(update_params)
+    post '/tasks' do
+      @task_management = current_user.task_managements.new(create_params)
+      if @task_management.save
+        response = ActiveModelSerializers::SerializableResource.new(@task_management, serializer: TaskMangementSerializer).as_json
+        response.to_json
+      else
+        error_message
+      end
+    end
 
-    halt 200, json(message: "Task updated successfully")
-  end
+    put '/tasks/:id' do
+      get_task_management(params[:id])
+      error_message unless @task_management.update(update_params)
 
-  delete '/tasks/:id' do
-    get_task_management(params[:id])
-    error_message unless @task_management.destroy
-    halt 200, json(message: "Task deleted successfully")
+      halt 200, json(message: "Task updated successfully")
+    end
+
+    delete '/tasks/:id' do
+      get_task_management(params[:id])
+      error_message unless @task_management.destroy
+      halt 200, json(message: "Task deleted successfully")
+    end
   end
 end

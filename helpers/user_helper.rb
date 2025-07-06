@@ -21,7 +21,7 @@ module UserHelper
     auth_header = request.env['HTTP_AUTHORIZATION']
     token = auth_header&.split(' ')&.last
     payload = decode_token(token)
-    User.find_by(id: payload['user_id']) if payload
+    @current_user ||= User.find_by(id: payload['user_id']) if payload
   end
 
   def protected!

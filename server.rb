@@ -9,6 +9,7 @@ require 'redis'
 require_relative 'config/sidekiq'
 
 set :port, 3000
+set :environment, ENV['APP_ENV'] || :development
 
 # Models
 require_relative 'models/user'
